@@ -222,7 +222,7 @@ cat >> config.layout << EOF
 # Layout for Drobo devices
 <Layout Drobo>
     prefix:        ${DEST}
-    exec_prefix:   \${prefix} 
+    exec_prefix:   \${prefix}
     bindir:        \${prefix}/bin
     sbindir:       \${prefix}/sbin
     libdir:        \${prefix}/lib
@@ -244,7 +244,7 @@ cat >> config.layout << EOF
 </Layout>
 EOF
 
-./configure --host="${HOST}" --prefix="${DEST}" --disable-static --enable-mods-shared=all --enable-load-all-modules --enable-so --enable-layout=Drobo --with-mpm=prefork --with-apr="${DEPS}" --with-apr-util="${DEPS}" --with-pcre="${DEPS}/bin/pcre-config" --with-z="${DEPS}" --with-ssl="${DEPS}" --with-lua="${DEPS}" --with-libxml2="${DEPS}/include/libxml2" --disable-ext-filter ap_cv_void_ptr_lt_long=no CFLAGS="${CFLAGS:-} -DBIG_SECURITY_HOLE"
+./configure --host="${HOST}" --prefix="${DEST}" --disable-static --enable-mods-shared=all --enable-load-all-modules --enable-so --enable-layout=Drobo --with-mpm=prefork --with-apr="${DEPS}" --with-apr-util="${DEPS}" --with-pcre="${DEPS}/bin/pcre-config" --with-z="${DEPS}" --with-ssl="${DEPS}" --with-lua="${DEPS}" --with-libxml2="${DEPS}/include/libxml2" --disable-ext-filter ap_cv_void_ptr_lt_long=no
 sed -i -e "/gen_test_char_OBJECTS = gen_test_char.lo/d" -e "s/gen_test_char: \$(gen_test_char_OBJECTS)/gen_test_char: gen_test_char.c/" -e "s/\$(LINK) \$(EXTRA_LDFLAGS) \$(gen_test_char_OBJECTS) \$(EXTRA_LIBS)/\$(CC_FOR_BUILD) \$(CFLAGS_FOR_BUILD) -DCROSS_COMPILE -o \$@ \$</" server/Makefile
 make CC_FOR_BUILD=/usr/bin/cc
 make install
