@@ -49,15 +49,14 @@ For PHP:
 * openssl: http://www.openssl.org/
 * expat: http://expat.sourceforge.net/
 * bzip: http://bzip.org/
-* libjpeg: 
-* libpng: 
-* freetype: 
-* libxml2: 
-* curl: 
-* libmcrypt: 
-* gmp: 
-* libxslt: 
-* bdb: 
+* libjpeg: http://www.ijg.org/
+* libpng: http://www.libpng.org/pub/png/libpng.html
+* freetype: http://www.freetype.org/
+* curl: http://curl.haxx.se/
+* libmcrypt: http://mcrypt.sourceforge.net/
+* gmp: https://gmplib.org/
+* libxslt: http://www.xmlsoft.org/
+* bdb: http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/overview/index.html
 * mysql-connector-c: https://dev.mysql.com/downloads/connector/c/
 * php: http://php.net/
 
