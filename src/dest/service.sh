@@ -10,7 +10,7 @@ name="apache2"
 version="2.4.12"
 description="HTTP server"
 depends=""
-webui=":8080/"
+webui=":80/"
 
 prog_dir="$(dirname "$(realpath "${0}")")"
 daemon="${prog_dir}/sbin/httpd"
