@@ -518,15 +518,16 @@ popd
 
 ### DEFAULT FILES ###
 _build_defaults() {
-echo "short_open_tag=On" > "${DEST}/etc/php.ini.default"
-echo "date.timezone=\"America/Los_Angeles\"" >> "${DEST}/etc/php.ini.default"
-echo "include_path=\".:${DEST}/lib/php\"" >> "${DEST}/etc/php.ini.default"
-echo "error_log=\"${DEST}/logs/php5_log\"" >> "${DEST}/etc/php.ini.default"
+local PHP_INI="${DEST}/etc/php.ini.default"
+echo "short_open_tag=On" > "${PHP_INI}"
+echo "date.timezone=\"America/Los_Angeles\"" >> "${PHP_INI}"
+echo "include_path=\".:${DEST}/lib/php\"" >> "${PHP_INI}"
+echo "error_log=\"${DEST}/logs/php5_log\"" >> "${PHP_INI}"
 for e in "${DEST}/lib/php/extensions/"no-debug-non-zts-*/*.so; do
   if [ "$(basename "${e}")" = "opcache.so" ]; then
-    echo "zend_extension=$(basename "${e}")" >> "${DEST}/etc/php.ini.default"
+    echo "zend_extension=$(basename "${e}")" >> "${PHP_INI}"
   else
-    echo "extension=$(basename "${e}")" >> "${DEST}/etc/php.ini.default"
+    echo "extension=$(basename "${e}")" >> "${PHP_INI}"
   fi
 done
 
