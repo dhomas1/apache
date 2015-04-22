@@ -535,6 +535,13 @@ find "${DEST}" -type f -name "*.conf" -print | while read conffile; do
 done
 }
 
+### CERTIFICATES ###
+_build_certificates() {
+# update CA certificates on a Debian/Ubuntu machine:
+#sudo update-ca-certificates
+cp -vf /etc/ssl/certs/ca-certificates.crt "${DEST}/etc/ssl/certs/"
+}
+
 ### BUILD ###
 _build() {
   _build_zlib
@@ -564,5 +571,6 @@ _build() {
   _build_php
 
   _build_defaults
+  _build_certificates
   _package
 }
