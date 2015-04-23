@@ -190,14 +190,8 @@ set_enabled()
 _unset_enabled()
 {
   local _appName="${1}"
-  local _value=""
 
-  # get value of name_enable where name is the service name
-  eval _value="\${${_appName}_enable:-}"
-  if [ -n "${_value}" ]; then
-    $SED -i "/${_appName}_enable=.*/d" "${SERVICE_CONF}"
-    unset "${_appName}_enable"
-  fi
+  $SED -i "/${_appName}_enable=.*/d" "${SERVICE_CONF}"
   return 0
 }
 
@@ -542,12 +536,6 @@ _deploy_apache_conf()
     return 1
   fi
   # After this point, apache is installed.
-
-  # Validate conf file.
-  if ! LD_LIBRARY_PATH="${_apacheDir}/lib" "${_apacheDir}/httpd" -t -f "${_appConf}" > /dev/null 2>&1; then
-    echo "Configuration file ${_appConf} is invalid." >&2
-    return 1
-  fi
 
   _apacheConf="${_apacheDir}/conf/includes/$($BASENAME "${_appConf}")"
   if [ ! -f "${_apacheConf}" ]; then
@@ -1165,7 +1153,7 @@ _status_app()
     fi
   fi
 
-  echo "${_status}"
+  eval echo "${_status}" ${STDOUT}
 }
 
 
@@ -1194,7 +1182,7 @@ status()
     _running="stopped"
   fi
 
-  echo "${_appName} is ${_enabled} and ${_running}."
+  eval echo "${_appName} is ${_enabled} and ${_running}." ${STDOUT}
 }
 
 
@@ -1246,7 +1234,7 @@ usage()
   fi
 
   _message="${_message}]"
-  echo "${_message}"
+  eval echo "${_message}" ${STDOUT}
   exit 1
 }
 
