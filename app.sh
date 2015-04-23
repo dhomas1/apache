@@ -26,7 +26,7 @@ cp -vf "src/${FOLDER}-parallel-build.patch" "target/${FOLDER}/"
 pushd "target/${FOLDER}"
 patch -p1 < "${FOLDER}-parallel-build.patch"
 ./Configure --prefix="${DEPS}" \
-  --openssldir="${DEST}/etc/ssl" \
+  --openssldir="${DEST}/conf/ssl" \
   --with-zlib-include="${DEPS}/include" \
   --with-zlib-lib="${DEPS}/lib" \
   shared zlib-dynamic threads linux-armv4 -DL_ENDIAN ${CFLAGS} ${LDFLAGS}
@@ -223,32 +223,31 @@ cat >> config.layout << EOF
 <Layout Drobo>
     prefix:        ${DEST}
     exec_prefix:   \${prefix}
-    bindir:        \${prefix}/bin
-    sbindir:       \${prefix}/sbin
-    libdir:        \${prefix}/lib
-    libexecdir:    \${prefix}/modules
+    bindir:        \${exec_prefix}/bin
+    sbindir:       \${exec_prefix}/sbin
+    libdir:        \${exec_prefix}/lib
+    libexecdir:    \${exec_prefix}/modules
     mandir:        \${prefix}/man
-    sysconfdir:    \${prefix}/etc
-    includedir:    \${prefix}/include
-    installbuilddir: \${includedir}/build
-    localstatedir: \${prefix}
-    datadir:       \${localstatedir}/www
+    sysconfdir:    \${prefix}/conf
+    datadir:       \${prefix}/share
+    installbuilddir: \${datadir}/build
     errordir:      \${datadir}/error
     iconsdir:      \${datadir}/icons
-    htdocsdir:     \${datadir}/html
+    htdocsdir:     \${prefix}/www
     manualdir:     \${datadir}/manual
     cgidir:        \${datadir}/cgi-bin
-    runtimedir:    /tmp/DroboApps/apache2
+    includedir:    \${prefix}/include
+    localstatedir: \${prefix}/var
+    runtimedir:    /tmp/DroboApps/apache
     logfiledir:    \${prefix}/logs
-    proxycachedir: \${datadir}/cache/root
+    proxycachedir: \${localstatedir}/cache/root
 </Layout>
 EOF
 
-./configure --host="${HOST}" --prefix="${DEST}" --disable-static --enable-mods-shared=all --enable-load-all-modules --enable-so --enable-layout=Drobo --with-mpm=prefork --with-apr="${DEPS}" --with-apr-util="${DEPS}" --with-pcre="${DEPS}/bin/pcre-config" --with-z="${DEPS}" --with-ssl="${DEPS}" --with-lua="${DEPS}" --with-libxml2="${DEPS}/include/libxml2" --disable-ext-filter ap_cv_void_ptr_lt_long=no
+./configure --host="${HOST}" --prefix="${DEST}" --disable-static --enable-mods-shared=all --enable-load-all-modules --enable-so --enable-layout=Drobo --with-mpm=prefork --with-apr="${DEPS}" --with-apr-util="${DEPS}" --with-pcre="${DEPS}/bin/pcre-config" --with-z="${DEPS}" --with-ssl="${DEPS}" --with-lua="${DEPS}" --with-libxml2="${DEPS}/include/libxml2" --disable-ext-filter ap_cv_void_ptr_lt_long=no CFLAGS="${CFLAGS:-} -DBIG_SECURITY_HOLE"
 sed -i -e "/gen_test_char_OBJECTS = gen_test_char.lo/d" -e "s/gen_test_char: \$(gen_test_char_OBJECTS)/gen_test_char: gen_test_char.c/" -e "s/\$(LINK) \$(EXTRA_LDFLAGS) \$(gen_test_char_OBJECTS) \$(EXTRA_LIBS)/\$(CC_FOR_BUILD) \$(CFLAGS_FOR_BUILD) -DCROSS_COMPILE -o \$@ \$</" server/Makefile
 make CC_FOR_BUILD=/usr/bin/cc
 make install
-ln -fs "etc" "${DEST}/conf"
 ln -fs "sbin/apachectl" "${DEST}/apachectl"
 ln -fs "sbin/httpd" "${DEST}/httpd"
 popd
@@ -469,7 +468,7 @@ ln -fs "${DEST}/lib/libpcre.so" "${DEPS}/lib/"
 ln -fs "${DEST}/lib/libexpat.so" "${DEPS}/lib/"
 ln -fs "${DEST}/lib/libdb.so" "${DEPS}/lib/"
 
-./configure --host="${HOST}" --prefix="${DEST}" \
+./configure --host="${HOST}" --prefix="${DEST}" --sysconfdir="${DEST}/conf" \
  --enable-all=shared \
  --enable-opcache \
  --enable-cli \
@@ -479,7 +478,7 @@ ln -fs "${DEST}/lib/libdb.so" "${DEPS}/lib/"
  --disable-embed \
  --with-apxs2="${DEST}/bin/apxs" \
  --with-bz2=shared,"${DEPS}" \
- --with-config-file-path="${DEST}/etc" \
+ --with-config-file-path="${DEST}/conf" \
  --with-curl=shared,"${DEPS}" \
  --with-db4="${DEPS}" \
  --with-freetype-dir="${DEPS}" \
@@ -512,19 +511,16 @@ ln -fs "${DEST}/lib/libdb.so" "${DEPS}/lib/"
  php_cv_sizeof_int8=0 php_cv_sizeof_uint8=0 php_cv_sizeof_int16=0 php_cv_sizeof_uint16=0 php_cv_sizeof_int32=0 php_cv_sizeof_uint32=0 php_cv_sizeof_uchar=0 php_cv_sizeof_ulong=4 php_cv_sizeof_int8_t=1 php_cv_sizeof_uint8_t=1 php_cv_sizeof_int16_t=2 php_cv_sizeof_uint16_t=2 php_cv_sizeof_int32_t=4 php_cv_sizeof_uint32_t=4 php_cv_sizeof_int64_t=8 php_cv_sizeof_uint64_t=8 php_cv_sizeof_intmax_t=8 php_cv_sizeof_ptrdiff_t=4 php_cv_sizeof_ssize_t=4
 
 make PHP_PHARCMD_EXECUTABLE=/usr/bin/php
-make -j1 PHP_PHARCMD_EXECUTABLE=/usr/bin/php PHP_EXECUTABLE=/usr/bin/php PHP_PEAR_SYSCONF_DIR="${DEST}/etc" install
+make -j1 PHP_PHARCMD_EXECUTABLE=/usr/bin/php PHP_EXECUTABLE=/usr/bin/php PHP_PEAR_SYSCONF_DIR="${DEST}/conf" install
 popd
 }
 
 ### DEFAULT FILES ###
 _build_defaults() {
-local PHP_INI="${DEST}/etc/php.ini.default"
-cat > "${PHP_INI}" << EOF
-short_open_tag = On
-date.timezone = "America/Los_Angeles"
-include_path = ".:${DEST}/lib/php"
-error_log = "${DEST}/logs/php_log"
-EOF
+local PHP_INI="${DEST}/conf/php.ini.default"
+cp "src/php.ini.default" "${PHP_INI}"
+echo "include_path = \".:${DEST}/lib/php\"" >> "${PHP_INI}"
+echo "error_log = \"${DEST}/logs/php.log\"" >> "${PHP_INI}"
 for e in "${DEST}/lib/php/extensions/"no-debug-non-zts-*/*.so; do
   if [ "$(basename "${e}")" = "opcache.so" ]; then
     echo "zend_extension=$(basename "${e}")" >> "${PHP_INI}"
@@ -542,7 +538,7 @@ done
 _build_certificates() {
 # update CA certificates on a Debian/Ubuntu machine:
 #sudo update-ca-certificates
-cp -vf /etc/ssl/certs/ca-certificates.crt "${DEST}/etc/ssl/certs/"
+cp -vf /etc/ssl/certs/ca-certificates.crt "${DEST}/conf/ssl/certs/"
 }
 
 ### BUILD ###

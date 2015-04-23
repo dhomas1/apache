@@ -1,0 +1,13 @@
+# VERSION 2.4.12
+
+PidFile "/tmp/DroboApps/apache/pid.txt"
+
+<IfModule mpm_prefork_module>
+  StartServers             1
+  MinSpareServers          1
+  MaxSpareServers          2
+  MaxRequestWorkers       50
+  MaxClients              50
+  MaxConnectionsPerChild   0
+  MaxRequestsPerChild      0
+</IfModule>

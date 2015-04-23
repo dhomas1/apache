@@ -1,6 +1,8 @@
-# apache2
+# apache
 
 This is a set of scripts to package a DroboApp from scratch, i.e., download sources, unpackage, compile, install, and package in a TGZ file. The `master` branch contains the Drobo5N version, the `drobofs` branch contains the DroboFS version.
+
+This repository generates a drop-in replacement for the official `apache` DroboApp, but with the latest Apache HTTP server, PHP module, and required libraries. The scripts here are a fork of the `apache2` repository at https://github.com/droboports/apache2.
 
 ## I just want to install the DroboApp, what do I do?
 

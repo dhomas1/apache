@@ -1,12 +1,12 @@
 #!/usr/bin/env sh
 #
-# Apache2 service
+# Apache service
 
 # import DroboApps framework functions
 . /etc/service.subr
 
 framework_version="2.1"
-name="apache2"
+name="apache"
 version="2.4.12"
 description="HTTP server"
 depends=""
