@@ -20,7 +20,7 @@ set -o xtrace   # enable script tracing
 
 # copy default configuration files
 find "${prog_dir}" -type f -name "*.default" -print | while read deffile; do
-  basefile="$(dirname ${deffile})/$(basename ${deffile} .default)"
+  basefile="$(dirname "${deffile}")/$(basename "${deffile}" .default)"
   if [ ! -f "${basefile}" ]; then
     cp -vf "${deffile}" "${basefile}"
   fi
