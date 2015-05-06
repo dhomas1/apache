@@ -35,14 +35,16 @@ CP=/bin/cp
 RM=/bin/rm
 CAT=/bin/cat
 SED=/bin/sed
-AWK=/usr/bin/awk
 TAR=/bin/tar
 GREP=/bin/grep
 MKDIR=/bin/mkdir
 TOUCH=/bin/touch
 SSD=/sbin/start-stop-daemon
 MKTEMP=/bin/mktemp
+WC=/usr/bin/wc
+AWK=/usr/bin/awk
 FIND=/usr/bin/find
+TAIL=/usr/bin/tail
 WGET=/usr/bin/wget
 DIFF=/usr/bin/diff
 BASENAME=/usr/bin/basename
@@ -74,6 +76,19 @@ fi
 if [ -f "${SERVICE_WEBUI}" ]; then
   . "${SERVICE_WEBUI}"
 fi
+
+
+# _tail_file
+# $1: file name
+# $2: nr of lines
+_tail_file()
+{
+  if [ "$($WC -l "${1}" | $AWK '{print $1}')" -gt "${2}" ]; then
+    $TAIL -n "${2}" "${1}" > "${1}.tail"
+    $CP "${1}.tail" "${1}"
+    $RM "${1}.tail"
+  fi
+}
 
 
 # _list_droboapps
@@ -331,7 +346,7 @@ _get_depends()
     if [ -n "${_depends}" ]; then
       # There is a depends in service.sh
       _depends="$(echo "${_depends}" | $SED -e 's/^[Dd]epends=//' -e 's/\"//g')"
-    elif [ -n "$(eval echo \${${_appName}_depends+isset})" ]; then
+    elif $GREP -q "^${_appName}_depends=" "${SERVICE_DEPENDS}"; then
       # Legacy information from /etc/service.depends
       # <app_name>_depends is set, possibly empty
       eval _depends="\${${_appName}_depends:-}"
@@ -339,7 +354,7 @@ _get_depends()
       # <app_name>_depends is not set
       _depends="${DEFAULT_DEPENDS:-}"
     fi
-  elif [ -n "$(eval echo \${${_appName}_depends+isset})" ]; then
+  elif $GREP -q "^${_appName}_depends=" "${SERVICE_DEPENDS}"; then
     # Legacy information from /etc/service.depends
     # <app_name>_depends is set, possibly empty
     eval _depends="\${${_appName}_depends:-}"
@@ -369,7 +384,7 @@ _extract_depends()
     if [ -n "${_depends}" ]; then
       # There is a depends in service.sh
       _depends="$(echo "${_depends}" | $SED -e 's/^[Dd]epends=//' -e 's/\"//g')"
-    elif [ -n "$(eval echo \${${_tgzName}_depends+isset})" ]; then
+    elif $GREP -q "^${_tgzName}_depends=" "${SERVICE_DEPENDS}"; then
       # Legacy information from /etc/service.depends
       # <app_name>_depends is set, possibly empty
       eval _depends="\${${_tgzName}_depends:-}"
@@ -377,7 +392,7 @@ _extract_depends()
       # <app_name>_depends is not set
       _depends="${DEFAULT_DEPENDS:-}"
     fi
-  elif [ -n "$(eval echo \${${_tgzName}_depends+isset})" ]; then
+  elif $GREP -q "^${_tgzName}_depends=" "${SERVICE_DEPENDS}"; then
     # Legacy information from /etc/service.depends
     # <app_name>_depends is set, possibly empty
     eval _depends="\${${_tgzName}_depends:-}"
@@ -810,7 +825,7 @@ _uninstall_app()
   local _depend=""
 
   if [ ! -d "${_dir}" ]; then
-    echo "${_appName} is not installed." >&2
+    eval echo "${_appName} is not installed." ${STDERR}
     return 1
   fi
 
@@ -1153,7 +1168,7 @@ _status_app()
     fi
   fi
 
-  eval echo "${_status}" ${STDOUT}
+  echo "${_status}"
 }
 
 
