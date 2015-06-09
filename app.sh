@@ -7,10 +7,9 @@ local URL="http://zlib.net/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
-./configure --prefix="${DEPS}" --libdir="${DEST}/lib"
+./configure --prefix="${DEPS}" --libdir="${DEST}/lib" --shared
 make
 make install
-rm -v "${DEST}/lib"/*.a
 popd
 }
 
@@ -46,7 +45,7 @@ popd
 
 ### SQLITE ###
 _build_sqlite() {
-local VERSION="3080900"
+local VERSION="3081002"
 local FOLDER="sqlite-autoconf-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sqlite.org/2015/${FILE}"
@@ -54,7 +53,7 @@ local URL="http://sqlite.org/2015/${FILE}"
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
 ./configure --host="${HOST}" --prefix="${DEPS}" --libdir="${DEST}/lib" --disable-static
-make
+make -j1
 make install
 popd
 }
@@ -114,7 +113,7 @@ popd
 
 ### PCRE ###
 _build_pcre() {
-local VERSION="8.36"
+local VERSION="8.37"
 local FOLDER="pcre-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sourceforge.net/projects/pcre/files/pcre/${VERSION}/${FILE}"
@@ -179,7 +178,7 @@ popd
 
 ### APR ###
 _build_apr() {
-local VERSION="1.5.1"
+local VERSION="1.5.2"
 local FOLDER="apr-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://mirror.switch.ch/mirror/apache/dist/apr/${FILE}"
@@ -259,7 +258,7 @@ _build_bzip() {
 local VERSION="1.0.6"
 local FOLDER="bzip2-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
-local URL="http://bzip.org/1.0.6/${FILE}"
+local URL="http://bzip.org/${VERSION}/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
@@ -318,7 +317,7 @@ popd
 
 ### CURL ###
 _build_curl() {
-local VERSION="7.41.0"
+local VERSION="7.42.1"
 local FOLDER="curl-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://curl.haxx.se/download/${FILE}"
@@ -451,7 +450,7 @@ popd
 ### PHP ###
 _build_php() {
 # sudo apt-get install php5-cli
-local VERSION="5.6.8"
+local VERSION="5.6.9"
 local FOLDER="php-${VERSION}"
 local FILE="${FOLDER}.tar.xz"
 local URL="http://ch1.php.net/get/${FILE}/from/this/mirror"
@@ -540,9 +539,7 @@ done
 
 ### CERTIFICATES ###
 _build_certificates() {
-# update CA certificates on a Debian/Ubuntu machine:
-#sudo update-ca-certificates
-cp -vf /etc/ssl/certs/ca-certificates.crt "${DEST}/etc/ssl/certs/"
+wget -O "${DEST}/etc/ssl/certs/ca-certificates.crt" "http://curl.haxx.se/ca/cacert.pem"
 }
 
 ### BUILD ###
