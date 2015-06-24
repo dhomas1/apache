@@ -16,6 +16,7 @@ prog_dir="$(dirname "$(realpath "${0}")")"
 daemon="${prog_dir}/sbin/httpd"
 homedir="${prog_dir}/var/empty"
 tmp_dir="/tmp/DroboApps/${name}"
+session_dir="${tmp_dir}/sessions"
 pidfile="${tmp_dir}/pid.txt"
 logfile="${tmp_dir}/log.txt"
 statusfile="${tmp_dir}/status.txt"
@@ -27,6 +28,8 @@ if [ -z "${FRAMEWORK_VERSION:-}" ]; then
 fi
 
 start() {
+  mkdir -p "${session_dir}"
+  chown -R nobody "${session_dir}"
   "${daemon}" -k start -E "${logfile}"
 }
 

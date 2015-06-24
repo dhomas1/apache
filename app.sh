@@ -23,22 +23,20 @@ local URL="http://www.openssl.org/source/${FILE}"
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 cp -vf "src/${FOLDER}-parallel-build.patch" "target/${FOLDER}/"
 pushd "target/${FOLDER}"
-patch -p1 < "${FOLDER}-parallel-build.patch"
-./Configure --prefix="${DEPS}" \
-  --openssldir="${DEST}/etc/ssl" \
-  --with-zlib-include="${DEPS}/include" \
-  --with-zlib-lib="${DEPS}/lib" \
-  shared zlib-dynamic threads linux-armv4 -DL_ENDIAN ${CFLAGS} ${LDFLAGS}
+patch -p1 -i "${FOLDER}-parallel-build.patch"
+./Configure --prefix="${DEPS}" --openssldir="${DEST}/etc/ssl" \
+  zlib-dynamic --with-zlib-include="${DEPS}/include" --with-zlib-lib="${DEPS}/lib" \
+  shared threads linux-armv4 -DL_ENDIAN ${CFLAGS} ${LDFLAGS} -Wa,--noexecstack -Wl,-z,noexecstack
 sed -i -e "s/-O3//g" Makefile
-make -j1
+make
 make install_sw
 mkdir -p "${DEST}/libexec"
-cp -avR "${DEPS}/bin/openssl" "${DEST}/libexec/"
-cp -avR "${DEPS}/lib"/libssl* "${DEST}/lib/"
-cp -avR "${DEPS}/lib"/libcrypto* "${DEST}/lib/"
-cp -avR "${DEPS}/lib/engines" "${DEST}/lib/"
-cp -avR "${DEPS}/lib/pkgconfig" "${DEST}/lib/"
-rm -fv "${DEST}/lib"/*.a
+cp -vfa "${DEPS}/bin/openssl" "${DEST}/libexec/"
+cp -vfa "${DEPS}/lib/"libssl* "${DEST}/lib/"
+cp -vfa "${DEPS}/lib/"libcrypto* "${DEST}/lib/"
+cp -vfaR "${DEPS}/lib/engines" "${DEST}/lib/"
+cp -vfaR "${DEPS}/lib/pkgconfig" "${DEST}/lib/"
+rm -vf "${DEST}/lib/libcrypto.a" "${DEST}/lib/libssl.a"
 sed -i -e "s|^exec_prefix=.*|exec_prefix=${DEST}|g" "${DEST}/lib/pkgconfig/openssl.pc"
 popd
 }
@@ -120,7 +118,7 @@ local URL="http://sourceforge.net/projects/pcre/files/pcre/${VERSION}/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
-./configure --host="${HOST}" --prefix="${DEPS}" --libdir="${DEST}/lib" --disable-static --enable-unicode-properties
+./configure --host="${HOST}" --prefix="${DEPS}" --libdir="${DEST}/lib" --disable-static --enable-unicode-properties --disable-stack-for-recursion
 make
 make install
 popd
@@ -317,7 +315,7 @@ popd
 
 ### CURL ###
 _build_curl() {
-local VERSION="7.42.1"
+local VERSION="7.43.0"
 local FOLDER="curl-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://curl.haxx.se/download/${FILE}"
@@ -450,7 +448,7 @@ popd
 ### PHP ###
 _build_php() {
 # sudo apt-get install php5-cli
-local VERSION="5.6.9"
+local VERSION="5.6.10"
 local FOLDER="php-${VERSION}"
 local FILE="${FOLDER}.tar.xz"
 local URL="http://ch1.php.net/get/${FILE}/from/this/mirror"
@@ -523,6 +521,11 @@ short_open_tag = On
 date.timezone = "America/Los_Angeles"
 include_path = ".:${DEST}/lib/php"
 error_log = "${DEST}/logs/php_log"
+session.save_path = "/tmp/DroboApps/apache2/sessions"
+output_buffering = Off
+openssl.cafile = "${DEST}/etc/ssl/certs/ca-certificates.crt"
+pcre.recursion_limit=16000
+pcre.backtrack_limit=16000
 EOF
 for e in "${DEST}/lib/php/extensions/"no-debug-non-zts-*/*.so; do
   if [ "$(basename "${e}")" = "opcache.so" ]; then
@@ -539,7 +542,9 @@ done
 
 ### CERTIFICATES ###
 _build_certificates() {
-wget -O "${DEST}/etc/ssl/certs/ca-certificates.crt" "http://curl.haxx.se/ca/cacert.pem"
+# update CA certificates on a Debian/Ubuntu machine:
+#sudo update-ca-certificates
+cp -vf /etc/ssl/certs/ca-certificates.crt "${DEST}/etc/ssl/certs/"
 }
 
 ### BUILD ###
