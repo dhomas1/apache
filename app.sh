@@ -280,6 +280,7 @@ make install
 #ln -fs "sbin/apachectl" "${DEST}/apachectl"
 #ln -fs "sbin/httpd" "${DEST}/httpd"
 mkdir -p "${DEST}/tmp"
+chmod 777 "${DEST}/tmp"
 popd
 }
 
@@ -590,9 +591,9 @@ output_buffering = Off
 openssl.cafile = "${DEST}/etc/ssl/certs/ca-certificates.crt"
 pcre.recursion_limit = 16000
 pcre.backtrack_limit = 16000
-upload_max_filesize = 2G
-post_max_size = 2G
-memory_limit = 2G
+upload_max_filesize = 2147483647
+post_max_size = 2147483647
+memory_limit = 2147483647
 upload_tmp_dir = "${DEST}/tmp"
 EOF
 for e in "${DEST}/lib/php/extensions/"no-debug-non-zts-*/*.so; do
