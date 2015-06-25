@@ -79,6 +79,21 @@ make install
 popd
 }
 
+### ICONV ###
+_build_iconv() {
+local VERSION="1.14"
+local FOLDER="libiconv-${VERSION}"
+local FILE="${FOLDER}.tar.gz"
+local URL="http://ftp.gnu.org/pub/gnu/libiconv/${FILE}"
+
+_download_tgz "${FILE}" "${URL}" "${FOLDER}"
+pushd "target/${FOLDER}"
+./configure --host="${HOST}" --prefix="${DEPS}" --libdir="${DEST}/lib" --disable-static
+make
+make install
+popd
+}
+
 ### LIBXML2 ###
 _build_libxml2() {
 local VERSION="2.9.2"
@@ -88,7 +103,7 @@ local URL="ftp://xmlsoft.org/libxml2/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
-PATH=$DEPS/bin:$PATH ./configure --host="${HOST}" --prefix="${DEPS}" --libdir="${DEST}/lib" --disable-static --with-zlib --with-icu --without-python LIBS="-lz"
+PATH=$DEPS/bin:$PATH ./configure --host="${HOST}" --prefix="${DEPS}" --libdir="${DEST}/lib" --disable-static --with-zlib --with-iconv --with-icu --without-python LIBS="-lz"
 make
 make install
 popd
@@ -190,6 +205,22 @@ make install
 popd
 }
 
+### APR ###
+_build_apr() {
+local VERSION="1.5.2"
+local FOLDER="apr-${VERSION}"
+local FILE="${FOLDER}.tar.gz"
+local URL="http://mirror.switch.ch/mirror/apache/dist/apr/${FILE}"
+
+_download_tgz "${FILE}" "${URL}" "${FOLDER}"
+pushd "target/${FOLDER}"
+./configure --host="${HOST}" --prefix="${DEPS}" --libdir="${DEST}/lib" --disable-static --enable-nonportable-atomics ac_cv_file__dev_zero=yes ac_cv_func_setpgrp_void=yes apr_cv_process_shared_works=yes apr_cv_mutex_robust_shared=no apr_cv_tcp_nodelay_with_cork=yes ac_cv_sizeof_struct_iovec=8 apr_cv_mutex_recursive=yes ac_cv_sizeof_pid_t=4 ac_cv_sizeof_size_t=4 ac_cv_struct_rlimit=yes ap_cv_atomic_builtins=yes apr_cv_epoll=yes apr_cv_epoll_create1=yes
+export QEMU_LD_PREFIX="${TOOLCHAIN}/${HOST}/libc"
+make
+make install
+popd
+}
+
 ### APR-UTIL ###
 _build_aprutil() {
 local VERSION="1.5.4"
@@ -245,9 +276,10 @@ EOF
 sed -i -e "/gen_test_char_OBJECTS = gen_test_char.lo/d" -e "s/gen_test_char: \$(gen_test_char_OBJECTS)/gen_test_char: gen_test_char.c/" -e "s/\$(LINK) \$(EXTRA_LDFLAGS) \$(gen_test_char_OBJECTS) \$(EXTRA_LIBS)/\$(CC_FOR_BUILD) \$(CFLAGS_FOR_BUILD) -DCROSS_COMPILE -o \$@ \$</" server/Makefile
 make CC_FOR_BUILD=/usr/bin/cc
 make install
-ln -fs "etc" "${DEST}/conf"
-ln -fs "sbin/apachectl" "${DEST}/apachectl"
-ln -fs "sbin/httpd" "${DEST}/httpd"
+#ln -fs "etc" "${DEST}/conf"
+#ln -fs "sbin/apachectl" "${DEST}/apachectl"
+#ln -fs "sbin/httpd" "${DEST}/httpd"
+mkdir -p "${DEST}/tmp"
 popd
 }
 
@@ -265,6 +297,21 @@ make -f Makefile-libbz2_so CC="${CC}" AR="${AR}" RANLIB="${RANLIB}" CFLAGS="${CF
 ln -s libbz2.so.1.0.6 libbz2.so
 cp -avR *.h "${DEPS}/include/"
 cp -avR *.so* "${DEST}/lib/"
+popd
+}
+
+### LIBLZMA ###
+_build_liblzma() {
+local VERSION="5.2.1"
+local FOLDER="xz-${VERSION}"
+local FILE="${FOLDER}.tar.gz"
+local URL="http://tukaani.org/xz/${FILE}"
+
+_download_tgz "${FILE}" "${URL}" "${FOLDER}"
+pushd "target/${FOLDER}"
+./configure --host="${HOST}" --prefix="${DEPS}" --libdir="${DEST}/lib" --disable-static --disable-{xz,xzdec,lzmadec,lzmainfo,lzma-links,scripts,docs}
+make
+make install
 popd
 }
 
@@ -293,6 +340,21 @@ local URL="http://sourceforge.net/projects/libpng/files/libpng16/${VERSION}/${FI
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
 ./configure --host="${HOST}" --prefix="${DEPS}" --libdir="${DEST}/lib" --disable-static
+make
+make install
+popd
+}
+
+### LIBTIFF ###
+_build_libtiff() {
+local VERSION="4.0.4"
+local FOLDER="tiff-${VERSION}"
+local FILE="${FOLDER}.tar.gz"
+local URL="ftp://ftp.remotesensing.org/pub/libtiff/${FILE}"
+
+_download_tgz "${FILE}" "${URL}" "${FOLDER}"
+pushd "target/${FOLDER}"
+./configure --host="${HOST}" --prefix="${DEPS}" --libdir="${DEST}/lib" --disable-static --enable-rpath
 make
 make install
 popd
@@ -456,7 +518,7 @@ local URL="http://ch1.php.net/get/${FILE}/from/this/mirror"
 _download_xz "${FILE}" "${URL}" "${FOLDER}"
 cp -vf "src/${FOLDER}-950-Fix-dl-cross-compiling-issue.patch" "target/${FOLDER}/"
 pushd "target/${FOLDER}"
-patch -p1 < "${FOLDER}-950-Fix-dl-cross-compiling-issue.patch"
+patch -p1 -i "${FOLDER}-950-Fix-dl-cross-compiling-issue.patch"
 ./buildconf --force
 
 sed -i -e "/unset ac_cv_func_dlopen/d" -e "/unset ac_cv_lib_dl_dlopen/d" configure
@@ -465,6 +527,7 @@ sed -i -e "s|\@\$(top_builddir)/sapi/cli/php|\@\$(PHP_EXECUTABLE)|" pear/Makefil
 ln -fs "${DEST}/lib/libpcre.so" "${DEPS}/lib/"
 ln -fs "${DEST}/lib/libexpat.so" "${DEPS}/lib/"
 ln -fs "${DEST}/lib/libdb.so" "${DEPS}/lib/"
+ln -fs "${DEST}/lib/libiconv.so" "${DEPS}/lib/"
 
 ./configure --host="${HOST}" --prefix="${DEST}" \
  --enable-all=shared \
@@ -482,7 +545,8 @@ ln -fs "${DEST}/lib/libdb.so" "${DEPS}/lib/"
  --with-freetype-dir="${DEPS}" \
  --with-gd=shared \
  --with-gmp=shared,"${DEPS}" \
- --with-iconv=shared \
+ --with-iconv="${DEPS}" \
+ --with-iconv-dir="${DEPS}" \
  --with-icu-dir="${DEPS}" \
  --with-jpeg-dir="${DEPS}" \
  --with-libexpat-dir="${DEPS}" \
@@ -503,7 +567,7 @@ ln -fs "${DEST}/lib/libdb.so" "${DEPS}/lib/"
  --with-xsl=shared,"${DEPS}" \
  --with-zlib=shared,"${DEPS}" \
  --with-zlib-dir="${DEPS}" \
- --without-{apxs,adabas,aolserver,birdstep,caudium,continuity,custom-odbc,db1,db2,db3,dbmaker,dbm,empress,empress-bcs,enchant,esoob,gdbm,ibm-db2,iconv,imap,interbase,iodbc,isapi,kerberos,ldap,libedit,litespeed,milter,mssql,ndbm,nsapi,oci8,ODBCRouter,pdo-dblib,pdo-firebird,pdo-oci,pdo-odbc,pdo-pgsql,pgsql,phttpd,pi3web,pspell,qdbm,recode,roxen,sapdb,snmp,solid,sybase-ct,t1lib,tcadb,thttpd,tidy,tux,unixODBC,vpx-dir,webjames,xpm-dir} \
+ --without-{apxs,adabas,aolserver,birdstep,caudium,continuity,custom-odbc,db1,db2,db3,dbmaker,dbm,empress,empress-bcs,enchant,esoob,gdbm,ibm-db2,imap,interbase,iodbc,isapi,kerberos,ldap,libedit,litespeed,milter,mssql,ndbm,nsapi,oci8,ODBCRouter,pdo-dblib,pdo-firebird,pdo-oci,pdo-odbc,pdo-pgsql,pgsql,phttpd,pi3web,pspell,qdbm,recode,roxen,sapdb,snmp,solid,sybase-ct,t1lib,tcadb,thttpd,tidy,tux,unixODBC,vpx-dir,webjames,xpm-dir} \
  CPPFLAGS="-I$DEPS/include/freetype2 -I$DEPS/include/freetype2" LIBS="-lssl -lpthread" \
  ac_cv_func_dlopen=yes ac_cv_lib_dl_dlopen=yes ac_cv_php_xml2_config_path="${DEPS}/bin/xml2-config" ac_cv_func_gethostname=yes ac_cv_func_getaddrinfo=yes ac_cv_func_utime_null=yes ac_cv_func_memcmp_working=yes ac_cv_func_fnmatch_works=yes ac_cv_crypt_ext_des=yes ac_cv_crypt_md5=yes ac_cv_crypt_blowfish=yes ac_cv_crypt_SHA512=yes ac_cv_crypt_SHA256=yes \
  php_cv_sizeof_int8=0 php_cv_sizeof_uint8=0 php_cv_sizeof_int16=0 php_cv_sizeof_uint16=0 php_cv_sizeof_int32=0 php_cv_sizeof_uint32=0 php_cv_sizeof_uchar=0 php_cv_sizeof_ulong=4 php_cv_sizeof_int8_t=1 php_cv_sizeof_uint8_t=1 php_cv_sizeof_int16_t=2 php_cv_sizeof_uint16_t=2 php_cv_sizeof_int32_t=4 php_cv_sizeof_uint32_t=4 php_cv_sizeof_int64_t=8 php_cv_sizeof_uint64_t=8 php_cv_sizeof_intmax_t=8 php_cv_sizeof_ptrdiff_t=4 php_cv_sizeof_ssize_t=4
@@ -524,8 +588,12 @@ error_log = "${DEST}/logs/php_log"
 session.save_path = "/tmp/DroboApps/apache2/sessions"
 output_buffering = Off
 openssl.cafile = "${DEST}/etc/ssl/certs/ca-certificates.crt"
-pcre.recursion_limit=16000
-pcre.backtrack_limit=16000
+pcre.recursion_limit = 16000
+pcre.backtrack_limit = 16000
+upload_max_filesize = 2G
+post_max_size = 2G
+memory_limit = 2G
+upload_tmp_dir = "${DEST}/tmp"
 EOF
 for e in "${DEST}/lib/php/extensions/"no-debug-non-zts-*/*.so; do
   if [ "$(basename "${e}")" = "opcache.so" ]; then
@@ -553,6 +621,7 @@ _build() {
   _build_openssl
   _build_sqlite
   _build_icu
+  _build_iconv
   _build_libxml2
   _build_expat
   _build_pcre
@@ -564,8 +633,10 @@ _build() {
   _build_httpd
 
   _build_bzip
+  _build_liblzma
   _build_libjpeg
   _build_libpng
+  _build_libtiff
   _build_freetype
   _build_curl
   _build_libmcrypt
