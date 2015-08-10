@@ -7,7 +7,7 @@
 
 framework_version="2.1"
 name="apache"
-version="2.4.12"
+version="2.4.16"
 description="HTTP server"
 depends=""
 webui=":8080/"
@@ -16,6 +16,7 @@ prog_dir="$(dirname "$(realpath "${0}")")"
 daemon="${prog_dir}/sbin/httpd"
 homedir="${prog_dir}/var/empty"
 tmp_dir="/tmp/DroboApps/${name}"
+session_dir="${tmp_dir}/sessions"
 pidfile="${tmp_dir}/pid.txt"
 logfile="${tmp_dir}/log.txt"
 statusfile="${tmp_dir}/status.txt"
@@ -23,10 +24,13 @@ errorfile="${tmp_dir}/error.txt"
 
 # backwards compatibility
 if [ -z "${FRAMEWORK_VERSION:-}" ]; then
+  framework_version="2.0"
   . "${prog_dir}/libexec/service.subr"
 fi
 
 start() {
+  mkdir -p "${session_dir}"
+#  chown -R nobody "${session_dir}"
   "${daemon}" -k start -E "${logfile}"
 }
 
@@ -50,7 +54,6 @@ STDERR=">&4"
 echo "$(date +"%Y-%m-%d %H-%M-%S"):" "${0}" "${@}"
 set -o errexit  # exit on uncaught error code
 set -o nounset  # exit on unset variable
-set -o pipefail # propagate last error code on pipe
 set -o xtrace   # enable script tracing
 
 main "${@}"
