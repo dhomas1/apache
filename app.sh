@@ -609,7 +609,7 @@ ln -fs "${DEST}/lib/libiconv.so" "${DEPS}/lib/"
   --disable-embed \
   --with-apxs2="${DEST}/bin/apxs" \
   --with-bz2=shared,"${DEPS}" \
-  --with-config-file-path="${DEST}/etc" \
+  --with-config-file-path="${DEST}/conf" \
   --with-curl=shared,"${DEPS}" \
   --with-db4="${DEPS}" \
   --with-freetype-dir="${DEPS}" \
