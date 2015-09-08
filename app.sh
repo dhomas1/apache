@@ -229,7 +229,7 @@ pushd "target/${FOLDER}"
   apr_cv_tcp_nodelay_with_cork=yes ac_cv_sizeof_struct_iovec=8 \
   apr_cv_mutex_recursive=yes ac_cv_sizeof_pid_t=4 ac_cv_sizeof_size_t=4 \
   ac_cv_struct_rlimit=yes ap_cv_atomic_builtins=yes apr_cv_epoll=yes \
-  apr_cv_epoll_create1=yes
+  apr_cv_epoll_create1=yes ac_cv_o_nonblock_inherited=no
 export QEMU_LD_PREFIX="${TOOLCHAIN}/${HOST}/libc"
 make
 make install
