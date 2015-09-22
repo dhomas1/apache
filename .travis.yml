@@ -1,6 +1,5 @@
 language: c
 compiler: gcc
-php: 5.6
 os: linux
 sudo: required
 
@@ -12,6 +11,7 @@ addons:
       - libncurses5:i386
       - qemu-user-static
       - binfmt-support
+      - php5-cli
 
 cache:
   directories:
@@ -29,9 +29,10 @@ install:
     fi
   - $HOME/xtools/toolchain/5n/bin/arm-marvell-linux-gnueabi-gcc --version
 
-script:
-  - ./build.sh
+script: ./build.sh
 
+after_failure: cat logfile_* | nc termbin.com 9999
+  
 branches:
   only:
     - master
