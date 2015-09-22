@@ -10,7 +10,9 @@ set -o pipefail
 # expand aliases
 shopt -s expand_aliases
 # print trace
-set -o xtrace
+if [ -z "${CONTINUOUS_INTEGRATION:-}" ]; then
+  set -o xtrace
+fi
 
 ### logfile ###
 timestamp="$(date +%Y-%m-%d_%H-%M-%S)"
