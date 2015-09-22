@@ -404,9 +404,10 @@ local URL="http://sourceforge.net/projects/freetype/files/freetype2/${VERSION}/$
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
-./configure --host="${HOST}" --prefix="${DEPS}" \
+PKG_CONFIG_PATH="${DEST}/lib/pkgconfig" \
+  ./configure --host="${HOST}" --prefix="${DEPS}" \
   --libdir="${DEST}/lib" --disable-static \
-  --with-zlib="${DEPS}" --with-bzip2="${DEPS}"
+  --with-zlib=yes --with-bzip2=yes --with-png=yes
 make
 make install
 popd
