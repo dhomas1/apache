@@ -1,5 +1,6 @@
-# VERSION 2.4.16
+# VERSION 2.4.17
 
+PidFile "/tmp/DroboApps/apache/pid.txt"
 ServerRoot "/mnt/DroboFS/Shares/DroboApps/apache"
 Listen 8080
 
@@ -105,18 +106,20 @@ LoadModule userdir_module modules/mod_userdir.so
 LoadModule alias_module modules/mod_alias.so
 LoadModule rewrite_module modules/mod_rewrite.so
 LoadModule php5_module modules/libphp5.so
+#LoadModule evasive20_module modules/mod_evasive24.so
 
 <IfModule unixd_module>
-User root
-Group root
+  User root
+  Group root
 </IfModule>
 
-ServerAdmin root@localhost
+ServerAdmin Admin@localhost
 ServerName localhost
 
 <Directory />
-  Options FollowSymLinks
-  AllowOverride None
+  Options None
+  AllowOverride none
+  Require all denied
 </Directory>
 
 DocumentRoot "/mnt/DroboFS/Shares/DroboApps/apache/www"
@@ -167,40 +170,64 @@ LogLevel warn
   AddType application/x-httpd-php .php
 </IfModule>
 
-# Multi-language error messages
-#Include conf/extra/httpd-multilang-errordoc.conf
-
-# Fancy directory listings
-#Include conf/extra/httpd-autoindex.conf
-
-# Language settings
-#Include etc/extra/httpd-languages.conf
-
-# User home directories
-#Include conf/extra/httpd-userdir.conf
-
-# Real-time info on requests and configuration
-#Include conf/extra/httpd-info.conf
-
-# Virtual hosts
-#Include conf/extra/httpd-vhosts.conf
-
-# Local access to the Apache HTTP Server Manual
-#Include conf/extra/httpd-manual.conf
-
-# Distributed authoring and versioning (WebDAV)
-#Include conf/extra/httpd-dav.conf
-
 <IfModule proxy_html_module>
-Include conf/extra/proxy-html.conf
+  Include conf/extra/proxy-html.conf
 </IfModule>
 
-# Secure (SSL/TLS) connections
-#Include conf/extra/httpd-ssl.conf
+# MPM configurations
+<IfModule mpm_prefork_module>
+  StartServers             1
+  MinSpareServers          1
+  MaxSpareServers          2
+  MaxRequestWorkers       30
+  MaxClients              30
+  MaxConnectionsPerChild   0
+  MaxRequestsPerChild      0
+</IfModule>
 
+# Server hardening
+AccessFileName .htaccess
+HostnameLookups Off
+KeepAlive On
+KeepAliveTimeout 5
+MaxKeepAliveRequests 100
+ServerTokens Prod
+ServerSignature Off
+Timeout 300
+TraceEnable off
+UseCanonicalName Off
+
+<IfModule reqtimeout_module>
+  RequestReadTimeout header=20-40,MinRate=500 body=20,MinRate=500
+</IfModule>
+
+# SSL configurations
 <IfModule ssl_module>
-SSLRandomSeed startup builtin
-SSLRandomSeed connect builtin
+  SSLProtocol All -SSLv3
+  SSLProxyProtocol All -SSLv3
+  SSLCompression off
+  SSLSessionCache shmcb:/tmp/DroboApps/apache/ssl_sessions(512000)
+  SSLSessionCacheTimeout 300
+  SSLSessionTickets off
+  SSLUseStapling on
+  SSLStaplingCache shmcb:/tmp/DroboApps/apache/ocsp(128000)
+  SSLStaplingResponderTimeout 5
+  SSLStaplingReturnResponderErrors off
+  SSLCipherSuite HIGH:MEDIUM:!MD5:!RC4
+  SSLProxyCipherSuite HIGH:MEDIUM:!MD5:!RC4
+  SSLHonorCipherOrder on
+
+  SSLRandomSeed startup builtin
+  SSLRandomSeed connect builtin
 </IfModule>
+
+# Default DroboApp configuration page settings
+<Directory "/mnt/DroboFS/Shares/DroboApps/*/www" >
+  Options Indexes FollowSymLinks MultiViews
+  AllowOverride None
+  Order allow,deny
+  Allow from all
+  Require all granted
+</Directory>
 
 IncludeOptional conf/includes/*.conf

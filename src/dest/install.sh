@@ -4,14 +4,17 @@
 
 prog_dir="$(dirname "$(realpath "${0}")")"
 name="$(basename "${prog_dir}")"
-conf_dir="${prog_dir}/conf/includes"
-inc_dir="/mnt/DroboFS/System/webui"
+version="2.4.17"
+phpversion="5.6.16"
+data_dir="/mnt/DroboFS/Shares/DroboApps/.AppData/${name}"
+old_data_dir="/mnt/DroboFS/System/webui"
+inc_dir="${prog_dir}/conf/includes"
 tmp_dir="/tmp/DroboApps/${name}"
 logfile="${tmp_dir}/install.log"
 httpdconf="${prog_dir}/conf/httpd.conf"
 phpconf="${prog_dir}/conf/php.ini"
-servercrt="${prog_dir}/conf/server.crt"
-serverkey="${prog_dir}/conf/server.key"
+servercrt="${data_dir}/certs/server.crt"
+serverkey="${data_dir}/certs/server.key"
 ts="$(date +"%Y-%m-%d-%H-%M-%S")"
 
 # boilerplate
@@ -26,33 +29,68 @@ set -o xtrace   # enable script tracing
 find "${prog_dir}" -type f -name "*.default" -print | while read deffile; do
   basefile="$(dirname "${deffile}")/$(basename "${deffile}" .default)"
   if [ ! -f "${basefile}" ]; then
-    cp -vf "${deffile}" "${basefile}"
+    cp -f "${deffile}" "${basefile}"
   fi
 done
 
-# force update of httpd.conf
-if [ -f "${httpdconf}" ] && ! grep -q "^# VERSION" "${httpdconf}"; then
+# Force update of httpd.conf if old version
+if [ -f "${httpdconf}" ] && ! grep -q "^# VERSION ${version}" "${httpdconf}"; then
   mv -f "${httpdconf}" "${httpdconf}.${ts}"
-  cp -vf "${httpdconf}.default" "${httpdconf}"
+  cp -f "${httpdconf}.default" "${httpdconf}"
+  rm -f "${prog_dir}/conf/includes/httpd-default.conf.default" "${prog_dir}/conf/includes/httpd-mpm.conf.default"
+  if [ -f "${prog_dir}/conf/includes/httpd-default.conf" ]; then
+    mv -f "${prog_dir}/conf/includes/httpd-default.conf" "${prog_dir}/conf/includes/httpd-default.conf.${ts}"
+  fi
+  if [ -f "${prog_dir}/conf/includes/httpd-mpm.conf" ]; then
+    mv -f "${prog_dir}/conf/includes/httpd-mpm.conf" "${prog_dir}/conf/includes/httpd-mpm.conf.${ts}"
+  fi
 fi
 
-# force update of php.ini
-if [ -f "${phpconf}" ] && ! grep -q "^; VERSION" "${phpconf}"; then
+# Force update of php.ini if old version
+if [ -f "${phpconf}" ] && ! grep -q "^; VERSION ${phpversion}" "${phpconf}"; then
   mv -f "${phpconf}" "${phpconf}.${ts}"
-  cp -vf "${phpconf}.default" "${phpconf}"
+  cp -f "${phpconf}.default" "${phpconf}"
 fi
 
 # Migrate includes
-if [ ! -d "${inc_dir}" ]; then
-  mkdir -p "${inc_dir}"
-fi
-if [ ! -h "${conf_dir}" ]; then
-  mv -vf "${conf_dir}/"* "${inc_dir}"
-  rm -vfr "${conf_dir}"
-  ln -vfs "${inc_dir}" "${conf_dir}"
+if [ ! -d "${data_dir}" ]; then
+  mkdir -p "${data_dir}"
 fi
 
-# generate SSL certificate
+if [ -d "${old_data_dir}" ]; then
+  if [ -d "${data_dir}/includes" ]; then
+    mv -f "${old_data_dir}/"* "${data_dir}/includes/" || true
+    rmdir "${old_data_dir}" || true
+  else
+    mv -f "${old_data_dir}" "${data_dir}/includes" || true
+  fi
+fi
+
+if [ -d "${inc_dir}" ] && [ ! -h "${inc_dir}" ]; then
+  if [ -d "${data_dir}/includes" ]; then
+    mv -f "${inc_dir}/"* "${data_dir}/includes/" || true
+    rmdir "${inc_dir}" || true
+  else
+    mv -f "${inc_dir}" "${data_dir}/includes" || true
+  fi
+fi
+
+if [ ! -d "${data_dir}/includes" ]; then
+  mkdir -p "${data_dir}/includes"
+fi
+ln -fs "${data_dir}/includes" "${inc_dir}"
+
+# Migrate or generate SSL certificate
+if [ ! -d "${data_dir}/certs" ]; then
+  mkdir -p "${data_dir}/certs"
+fi
+if [ -f "${prog_dir}/conf/server.crt" ]; then
+  mv -f "${prog_dir}/conf/server.crt" "${servercrt}"
+fi
+if [ -f "${prog_dir}/conf/server.key" ]; then
+  mv -f "${prog_dir}/conf/server.key" "${serverkey}"
+fi
+
 if [ ! -f "${servercrt}" -o ! -f "${serverkey}" ]; then
   "${prog_dir}/libexec/openssl" req -new -x509 -keyout "${serverkey}" -out "${servercrt}" -days 3650 -nodes -subj "/C=US/ST=CA/L=Santa Clara/CN=$(hostname)"
 fi

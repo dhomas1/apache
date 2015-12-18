@@ -7,7 +7,7 @@
 
 framework_version="2.1"
 name="apache"
-version="2.4.16"
+version="2.4.17"
 description="Apache is a secure, efficient and extensible server that provides HTTP services in sync with the current HTTP standards"
 depends=""
 webui=":8080/"
@@ -22,13 +22,27 @@ logfile="${tmp_dir}/log.txt"
 statusfile="${tmp_dir}/status.txt"
 errorfile="${tmp_dir}/error.txt"
 
-# backwards compatibility
-if [ -z "${FRAMEWORK_VERSION:-}" ]; then
-  framework_version="2.0"
-  . "${prog_dir}/libexec/service.subr"
-fi
+# check firmware version
+_firmware_check() {
+  local rc
+  local semver
+  rm -f "${statusfile}" "${errorfile}"
+  if [ -z "${FRAMEWORK_VERSION:-}" ]; then
+    echo "Unsupported Drobo firmware, please upgrade to the latest version." > "${statusfile}"
+    echo "4" > "${errorfile}"
+    return 1
+  fi
+  semver="$(/usr/bin/semver.sh "${framework_version}" "${FRAMEWORK_VERSION}")"
+  if [ "${semver}" == "1" ]; then
+    echo "Unsupported Drobo firmware, please upgrade to the latest version." > "${statusfile}"
+    echo "4" > "${errorfile}"
+    return 1
+  fi
+  return 0
+}
 
 start() {
+  _firmware_check
   mkdir -p "${session_dir}"
 #  chown -R nobody "${session_dir}"
   "${daemon}" -k start -E "${logfile}"

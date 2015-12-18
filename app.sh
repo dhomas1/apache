@@ -16,7 +16,7 @@ popd
 
 ### OPENSSL ###
 _build_openssl() {
-local VERSION="1.0.2d"
+local VERSION="1.0.2e"
 local FOLDER="openssl-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://mirror.switch.ch/ftp/mirror/openssl/source/${FILE}"
@@ -27,7 +27,7 @@ pushd "target/${FOLDER}"
 patch -p1 -i "${FOLDER}-parallel-build.patch"
 ./Configure --prefix="${DEPS}" --openssldir="${DEST}/etc/ssl" \
   zlib-dynamic --with-zlib-include="${DEPS}/include" --with-zlib-lib="${DEPS}/lib" \
-  shared threads linux-armv4 -DL_ENDIAN ${CFLAGS} ${LDFLAGS} \
+  shared threads linux-armv4 no-ssl2 no-ssl3 -DL_ENDIAN ${CFLAGS} ${LDFLAGS} \
   -Wa,--noexecstack -Wl,-z,noexecstack
 sed -i -e "s/-O3//g" Makefile
 make
@@ -46,7 +46,7 @@ popd
 
 ### SQLITE ###
 _build_sqlite() {
-local VERSION="3081101"
+local VERSION="3090200"
 local FOLDER="sqlite-autoconf-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sqlite.org/2015/${FILE}"
@@ -61,7 +61,7 @@ popd
 
 ### ICU ###
 _build_icu() {
-local VERSION="55.1"
+local VERSION="56.1"
 local FOLDER="icu"
 local FILE="icu4c-${VERSION/./_}-src.tgz"
 local URL="http://download.icu-project.org/files/icu4c/${VERSION}/${FILE}"
@@ -108,7 +108,7 @@ popd
 
 ### LIBXML2 ###
 _build_libxml2() {
-local VERSION="2.9.2"
+local VERSION="2.9.3"
 local FOLDER="libxml2-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="ftp://xmlsoft.org/libxml2/${FILE}"
@@ -143,10 +143,10 @@ popd
 
 ### PCRE ###
 _build_pcre() {
-local VERSION="8.37"
+local VERSION="8.38"
 local FOLDER="pcre-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
-local URL="http://sourceforge.net/projects/pcre/files/pcre/${VERSION}/${FILE}"
+local URL="ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
@@ -194,7 +194,6 @@ popd
 
 ### LUA ###
 _build_lua() {
-# Apache 2.4.12 does not support Lua 5.3.x
 local VERSION="5.2.4"
 local FOLDER="lua-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
@@ -203,12 +202,12 @@ local URL="http://www.lua.org/ftp/${FILE}"
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 cp -vf "src/${FOLDER}-liblua.so.patch" "target/${FOLDER}/"
 pushd "target/${FOLDER}"
-patch -p1 < "${FOLDER}-liblua.so.patch"
+patch -p1 -i "${FOLDER}-liblua.so.patch"
 make PLAT=linux RANLIB="${RANLIB}" CC="${CC}" AR="${AR} rcu" \
   MYCFLAGS="${CFLAGS:-}" MYLDFLAGS="${LDFLAGS:-}" MYLIBS="-lncurses"
 make install INSTALL_TOP="${DEPS}" INSTALL_LIB="${DEST}/lib"
 rm -vf "${DEST}/lib/liblua.a"
-ln -fs "liblua.so" "${DEST}/lib/liblua.so.1"
+cp -avf "src/liblua.so"* "${DEST}/lib/"
 popd
 }
 
@@ -257,7 +256,7 @@ popd
 
 ### HTTPD ###
 _build_httpd() {
-local VERSION="2.4.16"
+local VERSION="2.4.17"
 local FOLDER="httpd-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://mirror.switch.ch/mirror/apache/dist/httpd/${FILE}"
@@ -302,7 +301,8 @@ EOF
   --with-pcre="${DEPS}/bin/pcre-config" \
   --with-lua="${DEPS}" \
   --disable-ext-filter ap_cv_void_ptr_lt_long=no \
-  CFLAGS="${CFLAGS:-} -DBIG_SECURITY_HOLE"
+  CFLAGS="${CFLAGS:-} -DBIG_SECURITY_HOLE" \
+  MOD_LUA_LDADD="${LDFLAGS:-} -llua -lm"
 sed -i -e "/gen_test_char_OBJECTS = gen_test_char.lo/d" -e "s/gen_test_char: \$(gen_test_char_OBJECTS)/gen_test_char: gen_test_char.c/" -e "s/\$(LINK) \$(EXTRA_LDFLAGS) \$(gen_test_char_OBJECTS) \$(EXTRA_LIBS)/\$(CC_FOR_BUILD) \$(CFLAGS_FOR_BUILD) -DCROSS_COMPILE -o \$@ \$</" server/Makefile
 make CC_FOR_BUILD=/usr/bin/cc
 make install
@@ -310,6 +310,24 @@ ln -fs "sbin/apachectl" "${DEST}/apachectl"
 ln -fs "sbin/httpd" "${DEST}/httpd"
 mkdir -p "${DEST}/tmp"
 chmod 777 "${DEST}/tmp"
+popd
+}
+
+### MOD EVASIVE ###
+_build_modevasive() {
+local VERSION="1.10.1"
+# $1: branch
+# $2: folder
+# $3: url
+local COMMIT="14432d6887d195730bee0d55c401a3ca12c9c986"
+local FOLDER="mod_evasive-${COMMIT}"
+local FILE="${COMMIT}.zip"
+local URL="https://github.com/shivaas/mod_evasive/archive/${FILE}"
+
+_download_zip "${FILE}" "${URL}" "${FOLDER}"
+pushd "target/${FOLDER}"
+#"${DEST}/bin/apxs" --help
+"${DEST}/bin/apxs" -i -a -c mod_evasive24.c
 popd
 }
 
@@ -333,7 +351,7 @@ popd
 
 ### LIBLZMA ###
 _build_liblzma() {
-local VERSION="5.2.1"
+local VERSION="5.2.2"
 local FOLDER="xz-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://tukaani.org/xz/${FILE}"
@@ -367,7 +385,7 @@ popd
 
 ### LIBPNG ###
 _build_libpng() {
-local VERSION="1.6.18"
+local VERSION="1.6.20"
 local FOLDER="libpng-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sourceforge.net/projects/libpng/files/libpng16/${VERSION}/${FILE}"
@@ -383,7 +401,7 @@ popd
 
 ### LIBTIFF ###
 _build_libtiff() {
-local VERSION="4.0.4"
+local VERSION="4.0.6"
 local FOLDER="tiff-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="ftp://ftp.remotesensing.org/pub/libtiff/${FILE}"
@@ -400,7 +418,7 @@ popd
 
 ### FREETYPE ###
 _build_freetype() {
-local VERSION="2.5.5"
+local VERSION="2.6.2"
 local FOLDER="freetype-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sourceforge.net/projects/freetype/files/freetype2/${VERSION}/${FILE}"
@@ -418,7 +436,7 @@ popd
 
 ### CURL ###
 _build_curl() {
-local VERSION="7.43.0"
+local VERSION="7.46.0"
 local FOLDER="curl-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://curl.haxx.se/download/${FILE}"
@@ -455,9 +473,9 @@ popd
 
 ### GMP ###
 _build_gmp() {
-local VERSION="6.0.0"
+local VERSION="6.1.0"
 local FOLDER="gmp-${VERSION}"
-local FILE="${FOLDER}a.tar.xz"
+local FILE="${FOLDER}.tar.xz"
 local URL="ftp://ftp.gnu.org/gnu/gmp/${FILE}"
 
 _download_xz "${FILE}" "${URL}" "${FOLDER}"
@@ -490,7 +508,7 @@ popd
 
 ### BDB ###
 _build_bdb() {
-local VERSION="5.3.28"
+local VERSION="6.1.26"
 local FOLDER="db-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://download.oracle.com/berkeley-db/${FILE}"
@@ -581,15 +599,17 @@ popd
 ### PHP ###
 _build_php() {
 # sudo apt-get install php5-cli
-local VERSION="5.6.11"
+local VERSION="5.6.16"
 local FOLDER="php-${VERSION}"
 local FILE="${FOLDER}.tar.xz"
 local URL="http://ch1.php.net/get/${FILE}/from/this/mirror"
 
 _download_xz "${FILE}" "${URL}" "${FOLDER}"
 cp -vf "src/${FOLDER}-950-Fix-dl-cross-compiling-issue.patch" "target/${FOLDER}/"
+cp -vf "src/${FOLDER}-bug-65426-db6.patch" "target/${FOLDER}/"
 pushd "target/${FOLDER}"
 patch -p1 -i "${FOLDER}-950-Fix-dl-cross-compiling-issue.patch"
+patch -p0 -i "${FOLDER}-bug-65426-db6.patch"
 ./buildconf --force
 
 sed -i -e "/unset ac_cv_func_dlopen/d" -e "/unset ac_cv_lib_dl_dlopen/d" configure
