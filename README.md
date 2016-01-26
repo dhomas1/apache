@@ -6,7 +6,7 @@ This repository generates a drop-in replacement for the official `apache` DroboA
 
 ## I just want to install the DroboApp, what do I do?
 
-Check the [releases](https://github.com/droboports/apache2/releases) page. If there are no releases available, then you have to compile.
+Check the [releases](https://github.com/droboports/apache/releases) page. If there are no releases available, then you have to compile.
 
 ## How to compile
 
@@ -15,8 +15,8 @@ First make sure that you have a [working cross-compiling VM](https://github.com/
 Log in the VM, pick a temporary folder (e.g., `~/build`), and then do:
 
 ```
-git clone https://github.com/droboports/apache2.git
-cd apache2
+git clone https://github.com/droboports/apache.git
+cd apache
 ./build.sh
 ls -la *.tgz
 ```
