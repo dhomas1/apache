@@ -7,7 +7,7 @@
 
 framework_version="2.1"
 name="apache"
-version="2.4.17"
+version="2.4.18"
 description="Apache is a secure, efficient and extensible server that provides HTTP services in sync with the current HTTP standards"
 depends=""
 webui=":8080/"

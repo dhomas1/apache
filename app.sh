@@ -46,10 +46,10 @@ popd
 
 ### SQLITE ###
 _build_sqlite() {
-local VERSION="3090200"
+local VERSION="3100200"
 local FOLDER="sqlite-autoconf-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
-local URL="http://sqlite.org/2015/${FILE}"
+local URL="http://sqlite.org/$(date +%Y)/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
@@ -256,7 +256,7 @@ popd
 
 ### HTTPD ###
 _build_httpd() {
-local VERSION="2.4.17"
+local VERSION="2.4.18"
 local FOLDER="httpd-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://mirror.switch.ch/mirror/apache/dist/httpd/${FILE}"
@@ -385,7 +385,7 @@ popd
 
 ### LIBPNG ###
 _build_libpng() {
-local VERSION="1.6.20"
+local VERSION="1.6.21"
 local FOLDER="libpng-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sourceforge.net/projects/libpng/files/libpng16/${VERSION}/${FILE}"
@@ -599,7 +599,7 @@ popd
 ### PHP ###
 _build_php() {
 # sudo apt-get install php5-cli
-local VERSION="5.6.16"
+local VERSION="5.6.17"
 local FOLDER="php-${VERSION}"
 local FILE="${FOLDER}.tar.xz"
 local URL="http://ch1.php.net/get/${FILE}/from/this/mirror"
@@ -626,6 +626,7 @@ ln -fs "${DEST}/lib/libiconv.so" "${DEPS}/lib/"
   --enable-cli \
   --enable-cgi \
   --enable-fpm \
+  --enable-mysqlnd \
   --disable-static \
   --disable-embed \
   --with-apxs2="${DEST}/bin/apxs" \
@@ -642,14 +643,14 @@ ln -fs "${DEST}/lib/libiconv.so" "${DEPS}/lib/"
   --with-jpeg-dir="${DEPS}" \
   --with-libexpat-dir="${DEPS}" \
   --with-mcrypt=shared,"${DEPS}" \
-  --with-mysql=shared,"${DEPS}" \
-  --with-mysqli=shared,"${DEPS}/bin/mysql_config" \
+  --with-mysql=shared,mysqlnd \
+  --with-mysqli=shared,mysqlnd \
   --with-openssl="${DEPS}" \
   --with-openssl-dir="${DEPS}" \
   --with-pcre-dir="${DEPS}" \
   --with-pcre-regex="${DEPS}" \
   --with-png-dir="${DEPS}" \
-  --with-pdo-mysql=shared,"${DEPS}/bin/mysql_config" \
+  --with-pdo-mysql=shared,mysqlnd \
   --with-pdo-sqlite=shared,"${DEPS}" \
   --with-pear=shared \
   --with-readline="${DEPS}" \
@@ -659,9 +660,40 @@ ln -fs "${DEST}/lib/libiconv.so" "${DEPS}/lib/"
   --with-zlib=shared,"${DEPS}" \
   --with-zlib-dir="${DEPS}" \
   --without-{apxs,adabas,aolserver,birdstep,caudium,continuity,custom-odbc,db1,db2,db3,dbmaker,dbm,empress,empress-bcs,enchant,esoob,gdbm,ibm-db2,imap,interbase,iodbc,isapi,kerberos,ldap,libedit,litespeed,milter,mssql,ndbm,nsapi,oci8,ODBCRouter,pdo-dblib,pdo-firebird,pdo-oci,pdo-odbc,pdo-pgsql,pgsql,phttpd,pi3web,pspell,qdbm,recode,roxen,sapdb,snmp,solid,sybase-ct,t1lib,tcadb,thttpd,tidy,tux,unixODBC,vpx-dir,webjames,xpm-dir} \
-  CPPFLAGS="-I$DEPS/include/freetype2 -I$DEPS/include/freetype2" LIBS="-lssl -lpthread" \
-  ac_cv_func_dlopen=yes ac_cv_lib_dl_dlopen=yes ac_cv_php_xml2_config_path="${DEPS}/bin/xml2-config" ac_cv_func_gethostname=yes ac_cv_func_getaddrinfo=yes ac_cv_func_utime_null=yes ac_cv_func_memcmp_working=yes ac_cv_func_fnmatch_works=yes ac_cv_crypt_ext_des=yes ac_cv_crypt_md5=yes ac_cv_crypt_blowfish=yes ac_cv_crypt_SHA512=yes ac_cv_crypt_SHA256=yes \
-  php_cv_sizeof_int8=0 php_cv_sizeof_uint8=0 php_cv_sizeof_int16=0 php_cv_sizeof_uint16=0 php_cv_sizeof_int32=0 php_cv_sizeof_uint32=0 php_cv_sizeof_uchar=0 php_cv_sizeof_ulong=4 php_cv_sizeof_int8_t=1 php_cv_sizeof_uint8_t=1 php_cv_sizeof_int16_t=2 php_cv_sizeof_uint16_t=2 php_cv_sizeof_int32_t=4 php_cv_sizeof_uint32_t=4 php_cv_sizeof_int64_t=8 php_cv_sizeof_uint64_t=8 php_cv_sizeof_intmax_t=8 php_cv_sizeof_ptrdiff_t=4 php_cv_sizeof_ssize_t=4
+  CPPFLAGS="-I$DEPS/include/freetype2 -I$DEPS/include/freetype2" \
+  LIBS="-lssl -lpthread" \
+  ac_cv_crypt_blowfish=yes \
+  ac_cv_crypt_ext_des=yes \
+  ac_cv_crypt_md5=yes \
+  ac_cv_crypt_SHA256=yes \
+  ac_cv_crypt_SHA512=yes \
+  ac_cv_func_dlopen=yes \
+  ac_cv_func_fnmatch_works=yes \
+  ac_cv_func_gethostname=yes \
+  ac_cv_func_getaddrinfo=yes \
+  ac_cv_func_memcmp_working=yes \
+  ac_cv_func_utime_null=yes \
+  ac_cv_lib_dl_dlopen=yes \
+  ac_cv_php_xml2_config_path="${DEPS}/bin/xml2-config" \
+  php_cv_sizeof_int8=0 \
+  php_cv_sizeof_uint8=0 \
+  php_cv_sizeof_int16=0 \
+  php_cv_sizeof_uint16=0 \
+  php_cv_sizeof_int32=0 \
+  php_cv_sizeof_uint32=0 \
+  php_cv_sizeof_uchar=0 \
+  php_cv_sizeof_ulong=4 \
+  php_cv_sizeof_int8_t=1 \
+  php_cv_sizeof_uint8_t=1 \
+  php_cv_sizeof_int16_t=2 \
+  php_cv_sizeof_uint16_t=2 \
+  php_cv_sizeof_int32_t=4 \
+  php_cv_sizeof_uint32_t=4 \
+  php_cv_sizeof_int64_t=8 \
+  php_cv_sizeof_uint64_t=8 \
+  php_cv_sizeof_intmax_t=8 \
+  php_cv_sizeof_ptrdiff_t=4 \
+  php_cv_sizeof_ssize_t=4
 
 make PHP_PHARCMD_EXECUTABLE=/usr/bin/php
 make -j1 PHP_PHARCMD_EXECUTABLE=/usr/bin/php PHP_EXECUTABLE=/usr/bin/php PHP_PEAR_SYSCONF_DIR="${DEST}/conf" install

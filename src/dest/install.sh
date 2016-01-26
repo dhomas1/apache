@@ -4,8 +4,8 @@
 
 prog_dir="$(dirname "$(realpath "${0}")")"
 name="$(basename "${prog_dir}")"
-version="2.4.17"
-phpversion="5.6.16"
+version="2.4.18"
+phpversion="5.6.17"
 data_dir="/mnt/DroboFS/Shares/DroboApps/.AppData/${name}"
 old_data_dir="/mnt/DroboFS/System/webui"
 inc_dir="${prog_dir}/conf/includes"
