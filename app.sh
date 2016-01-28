@@ -16,6 +16,41 @@ rm -vf "${DEST}/lib/libz.a"
 popd
 }
 
+### BZIP ###
+_build_bzip() {
+local VERSION="1.0.6"
+local FOLDER="bzip2-${VERSION}"
+local FILE="${FOLDER}.tar.gz"
+local URL="http://bzip.org/${VERSION}/${FILE}"
+
+_download_tgz "${FILE}" "${URL}" "${FOLDER}"
+pushd "target/${FOLDER}"
+sed -i -e "s/all: libbz2.a bzip2 bzip2recover test/all: libbz2.a bzip2 bzip2recover/" Makefile
+make -f Makefile-libbz2_so CC="${CC}" AR="${AR}" RANLIB="${RANLIB}" \
+  CFLAGS="${CFLAGS} -fpic -fPIC -Wall -D_FILE_OFFSET_BITS=64"
+ln -s libbz2.so.1.0.6 libbz2.so
+cp -avR *.h "${DEPS}/include/"
+cp -avR *.so* "${DEST}/lib/"
+popd
+}
+
+### LIBLZMA ###
+_build_liblzma() {
+local VERSION="5.2.2"
+local FOLDER="xz-${VERSION}"
+local FILE="${FOLDER}.tar.gz"
+local URL="http://tukaani.org/xz/${FILE}"
+
+_download_tgz "${FILE}" "${URL}" "${FOLDER}"
+pushd "target/${FOLDER}"
+./configure --host="${HOST}" --prefix="${DEPS}" \
+  --libdir="${DEST}/lib" --disable-static \
+  --disable-{xz,xzdec,lzmadec,lzmainfo,lzma-links,scripts,docs}
+make
+make install
+popd
+}
+
 ### OPENSSL ###
 _build_openssl() {
 local VERSION="1.0.2f"
@@ -330,41 +365,6 @@ _download_zip "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
 #"${DEST}/bin/apxs" --help
 "${DEST}/bin/apxs" -i -a -c mod_evasive24.c
-popd
-}
-
-### BZIP ###
-_build_bzip() {
-local VERSION="1.0.6"
-local FOLDER="bzip2-${VERSION}"
-local FILE="${FOLDER}.tar.gz"
-local URL="http://bzip.org/${VERSION}/${FILE}"
-
-_download_tgz "${FILE}" "${URL}" "${FOLDER}"
-pushd "target/${FOLDER}"
-sed -i -e "s/all: libbz2.a bzip2 bzip2recover test/all: libbz2.a bzip2 bzip2recover/" Makefile
-make -f Makefile-libbz2_so CC="${CC}" AR="${AR}" RANLIB="${RANLIB}" \
-  CFLAGS="${CFLAGS} -fpic -fPIC -Wall -D_FILE_OFFSET_BITS=64"
-ln -s libbz2.so.1.0.6 libbz2.so
-cp -avR *.h "${DEPS}/include/"
-cp -avR *.so* "${DEST}/lib/"
-popd
-}
-
-### LIBLZMA ###
-_build_liblzma() {
-local VERSION="5.2.2"
-local FOLDER="xz-${VERSION}"
-local FILE="${FOLDER}.tar.gz"
-local URL="http://tukaani.org/xz/${FILE}"
-
-_download_tgz "${FILE}" "${URL}" "${FOLDER}"
-pushd "target/${FOLDER}"
-./configure --host="${HOST}" --prefix="${DEPS}" \
-  --libdir="${DEST}/lib" --disable-static \
-  --disable-{xz,xzdec,lzmadec,lzmainfo,lzma-links,scripts,docs}
-make
-make install
 popd
 }
 
@@ -717,6 +717,8 @@ cp -vf /etc/ssl/certs/ca-certificates.crt "${DEST}/etc/ssl/certs/"
 ### BUILD ###
 _build() {
   _build_zlib
+  _build_bzip
+  _build_liblzma
   _build_openssl
   _build_sqlite
   _build_icu
@@ -731,8 +733,6 @@ _build() {
   _build_aprutil
   _build_httpd
 
-  _build_bzip
-  _build_liblzma
   _build_libjpeg
   _build_libpng
   _build_libtiff
