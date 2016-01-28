@@ -1,3 +1,5 @@
+#CFLAGS="${CFLAGS} -D_FILE_OFFSET_BITS=64"
+
 ### ZLIB ###
 _build_zlib() {
 local VERSION="1.2.8"
@@ -16,7 +18,7 @@ popd
 
 ### OPENSSL ###
 _build_openssl() {
-local VERSION="1.0.2e"
+local VERSION="1.0.2f"
 local FOLDER="openssl-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://mirror.switch.ch/ftp/mirror/openssl/source/${FILE}"
@@ -605,10 +607,10 @@ local FILE="${FOLDER}.tar.xz"
 local URL="http://ch1.php.net/get/${FILE}/from/this/mirror"
 
 _download_xz "${FILE}" "${URL}" "${FOLDER}"
-cp -vf "src/${FOLDER}-950-Fix-dl-cross-compiling-issue.patch" "target/${FOLDER}/"
+cp -vf "src/${FOLDER}-cross-compile.patch" "target/${FOLDER}/"
 cp -vf "src/${FOLDER}-bug-65426-db6.patch" "target/${FOLDER}/"
 pushd "target/${FOLDER}"
-patch -p1 -i "${FOLDER}-950-Fix-dl-cross-compiling-issue.patch"
+patch -p1 -i "${FOLDER}-cross-compile.patch"
 patch -p0 -i "${FOLDER}-bug-65426-db6.patch"
 ./buildconf --force
 
@@ -626,6 +628,7 @@ ln -fs "${DEST}/lib/libiconv.so" "${DEPS}/lib/"
   --enable-cli \
   --enable-cgi \
   --enable-fpm \
+  --enable-hash \
   --enable-mysqlnd \
   --disable-static \
   --disable-embed \
@@ -642,6 +645,7 @@ ln -fs "${DEST}/lib/libiconv.so" "${DEPS}/lib/"
   --with-icu-dir="${DEPS}" \
   --with-jpeg-dir="${DEPS}" \
   --with-libexpat-dir="${DEPS}" \
+  --with-libxml-dir="${DEPS}" \
   --with-mcrypt=shared,"${DEPS}" \
   --with-mysql=shared,mysqlnd \
   --with-mysqli=shared,mysqlnd \
@@ -662,11 +666,6 @@ ln -fs "${DEST}/lib/libiconv.so" "${DEPS}/lib/"
   --without-{apxs,adabas,aolserver,birdstep,caudium,continuity,custom-odbc,db1,db2,db3,dbmaker,dbm,empress,empress-bcs,enchant,esoob,gdbm,ibm-db2,imap,interbase,iodbc,isapi,kerberos,ldap,libedit,litespeed,milter,mssql,ndbm,nsapi,oci8,ODBCRouter,pdo-dblib,pdo-firebird,pdo-oci,pdo-odbc,pdo-pgsql,pgsql,phttpd,pi3web,pspell,qdbm,recode,roxen,sapdb,snmp,solid,sybase-ct,t1lib,tcadb,thttpd,tidy,tux,unixODBC,vpx-dir,webjames,xpm-dir} \
   CPPFLAGS="-I$DEPS/include/freetype2 -I$DEPS/include/freetype2" \
   LIBS="-lssl -lpthread" \
-  ac_cv_crypt_blowfish=yes \
-  ac_cv_crypt_ext_des=yes \
-  ac_cv_crypt_md5=yes \
-  ac_cv_crypt_SHA256=yes \
-  ac_cv_crypt_SHA512=yes \
   ac_cv_func_dlopen=yes \
   ac_cv_func_fnmatch_works=yes \
   ac_cv_func_gethostname=yes \
@@ -674,26 +673,10 @@ ln -fs "${DEST}/lib/libiconv.so" "${DEPS}/lib/"
   ac_cv_func_memcmp_working=yes \
   ac_cv_func_utime_null=yes \
   ac_cv_lib_dl_dlopen=yes \
-  ac_cv_php_xml2_config_path="${DEPS}/bin/xml2-config" \
-  php_cv_sizeof_int8=0 \
-  php_cv_sizeof_uint8=0 \
-  php_cv_sizeof_int16=0 \
-  php_cv_sizeof_uint16=0 \
-  php_cv_sizeof_int32=0 \
-  php_cv_sizeof_uint32=0 \
-  php_cv_sizeof_uchar=0 \
-  php_cv_sizeof_ulong=4 \
-  php_cv_sizeof_int8_t=1 \
-  php_cv_sizeof_uint8_t=1 \
-  php_cv_sizeof_int16_t=2 \
-  php_cv_sizeof_uint16_t=2 \
-  php_cv_sizeof_int32_t=4 \
-  php_cv_sizeof_uint32_t=4 \
-  php_cv_sizeof_int64_t=8 \
-  php_cv_sizeof_uint64_t=8 \
-  php_cv_sizeof_intmax_t=8 \
-  php_cv_sizeof_ptrdiff_t=4 \
-  php_cv_sizeof_ssize_t=4
+  ac_cv_pread=yes \
+  ac_cv_pthreads_cflags="-pthread" \
+  ac_cv_pthreads_lib="-pthread" \
+  ac_cv_pwrite=yes
 
 make PHP_PHARCMD_EXECUTABLE=/usr/bin/php
 make -j1 PHP_PHARCMD_EXECUTABLE=/usr/bin/php PHP_EXECUTABLE=/usr/bin/php PHP_PEAR_SYSCONF_DIR="${DEST}/conf" install
