@@ -1,3 +1,5 @@
+Warning: Work in Progress. Not yet functional. 
+
 # apache ![](https://travis-ci.org/droboports/apache.svg?branch=master)
 
 This is a set of scripts to package a DroboApp from scratch, i.e., download sources, unpackage, compile, install, and package in a TGZ file. The `master` branch contains the Drobo5N version, the `drobofs` branch contains the DroboFS version.
