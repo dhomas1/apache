@@ -96,9 +96,9 @@ popd
 
 ### ICU ###
 _build_icu() {
-local VERSION="72.1"
+local VERSION="72-1"
 local FOLDER="icu"
-local FILE="icu4c-${VERSION/./_}-src.tgz"
+local FILE="icu4c-${VERSION/-/_}-src.tgz"
 local URL="https://github.com/unicode-org/icu/releases/download/release-${VERSION}/${FILE}"
 local ICU="${PWD}/target/${FOLDER}"
 local ICU_NATIVE="${PWD}/target/${FOLDER}-native"
