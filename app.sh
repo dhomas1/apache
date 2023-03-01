@@ -2,7 +2,7 @@
 
 ### ZLIB ###
 _build_zlib() {
-local VERSION="1.2.8"
+local VERSION="1.2.13"
 local FOLDER="zlib-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://zlib.net/${FILE}"
@@ -18,10 +18,10 @@ popd
 
 ### BZIP ###
 _build_bzip() {
-local VERSION="1.0.6"
+local VERSION="1.0.8"
 local FOLDER="bzip2-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
-local URL="http://bzip.org/${VERSION}/${FILE}"
+local URL="https://sourceware.org/pub/bzip2/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
@@ -36,7 +36,7 @@ popd
 
 ### LIBLZMA ###
 _build_liblzma() {
-local VERSION="5.2.2"
+local VERSION="5.4.1"
 local FOLDER="xz-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://tukaani.org/xz/${FILE}"
@@ -53,10 +53,10 @@ popd
 
 ### OPENSSL ###
 _build_openssl() {
-local VERSION="1.0.2f"
+local VERSION="1.1.1t"
 local FOLDER="openssl-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
-local URL="http://mirror.switch.ch/ftp/mirror/openssl/source/${FILE}"
+local URL="http://www.openssl.org/source/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 cp -vf "src/${FOLDER}-parallel-build.patch" "target/${FOLDER}/"
@@ -83,7 +83,7 @@ popd
 
 ### SQLITE ###
 _build_sqlite() {
-local VERSION="3100200"
+local VERSION="3410000"
 local FOLDER="sqlite-autoconf-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sqlite.org/$(date +%Y)/${FILE}"
@@ -98,10 +98,10 @@ popd
 
 ### ICU ###
 _build_icu() {
-local VERSION="56.1"
+local VERSION="72.1"
 local FOLDER="icu"
 local FILE="icu4c-${VERSION/./_}-src.tgz"
-local URL="http://download.icu-project.org/files/icu4c/${VERSION}/${FILE}"
+local URL="https://github.com/unicode-org/icu/releases/download/release-${VERSION}/${FILE}"
 local ICU="${PWD}/target/${FOLDER}"
 local ICU_NATIVE="${PWD}/target/${FOLDER}-native"
 local ICU_HOST="${PWD}/target/${FOLDER}-host"
@@ -129,7 +129,7 @@ popd
 
 ### ICONV ###
 _build_iconv() {
-local VERSION="1.14"
+local VERSION="1.17"
 local FOLDER="libiconv-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://ftp.gnu.org/pub/gnu/libiconv/${FILE}"
@@ -145,12 +145,12 @@ popd
 
 ### LIBXML2 ###
 _build_libxml2() {
-local VERSION="2.9.3"
+local VERSION="2.9.14"
 local FOLDER="libxml2-${VERSION}"
-local FILE="${FOLDER}.tar.gz"
-local URL="ftp://xmlsoft.org/libxml2/${FILE}"
+local FILE="${FOLDER}.tar.xz"
+local URL="https://download.gnome.org/sources/libxml2/${FILE}"
 
-_download_tgz "${FILE}" "${URL}" "${FOLDER}"
+_download_xz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
 PATH=$DEPS/bin:$PATH \
   ./configure --host="${HOST}" --prefix="${DEPS}" \
@@ -164,7 +164,7 @@ popd
 
 ### EXPAT ###
 _build_expat() {
-local VERSION="2.1.0"
+local VERSION="2.5.0"
 local FOLDER="expat-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sourceforge.net/projects/expat/files/expat/${VERSION}/${FILE}"
@@ -180,10 +180,10 @@ popd
 
 ### PCRE ###
 _build_pcre() {
-local VERSION="8.38"
+local VERSION="8.45"
 local FOLDER="pcre-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
-local URL="ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/${FILE}"
+local URL="https://sourceforge.net/projects/pcre/files/pcre/${VERSION}/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
@@ -197,7 +197,7 @@ popd
 
 ### NCURSES ###
 _build_ncurses() {
-local VERSION="5.9"
+local VERSION="6.0"
 local FOLDER="ncurses-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://ftp.gnu.org/gnu/ncurses/${FILE}"
@@ -214,7 +214,7 @@ popd
 
 ### READLINE ###
 _build_readline() {
-local VERSION="6.3"
+local VERSION="8.2"
 local FOLDER="readline-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="ftp://ftp.cwru.edu/pub/bash/${FILE}"
@@ -231,7 +231,7 @@ popd
 
 ### LUA ###
 _build_lua() {
-local VERSION="5.2.4"
+local VERSION="5.4.4"
 local FOLDER="lua-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://www.lua.org/ftp/${FILE}"
@@ -250,10 +250,10 @@ popd
 
 ### APR ###
 _build_apr() {
-local VERSION="1.5.2"
+local VERSION="1.7.2"
 local FOLDER="apr-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
-local URL="http://mirror.switch.ch/mirror/apache/dist/apr/${FILE}"
+local URL="https://dlcdn.apache.org/apr/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
@@ -274,10 +274,10 @@ popd
 
 ### APR-UTIL ###
 _build_aprutil() {
-local VERSION="1.5.4"
+local VERSION="1.6.3"
 local FOLDER="apr-util-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
-local URL="http://mirror.switch.ch/mirror/apache/dist/apr/${FILE}"
+local URL="https://dlcdn.apache.org/apr/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
@@ -293,10 +293,10 @@ popd
 
 ### HTTPD ###
 _build_httpd() {
-local VERSION="2.4.18"
+local VERSION="2.4.55"
 local FOLDER="httpd-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
-local URL="http://mirror.switch.ch/mirror/apache/dist/httpd/${FILE}"
+local URL="https://dlcdn.apache.org/httpd/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
@@ -370,7 +370,7 @@ popd
 
 ### LIBJPEG ###
 _build_libjpeg() {
-local VERSION="9a"
+local VERSION="9e"
 local FOLDER="jpeg-${VERSION}"
 local FILE="jpegsrc.v${VERSION}.tar.gz"
 local URL="http://www.ijg.org/files/${FILE}"
@@ -387,7 +387,7 @@ popd
 
 ### LIBPNG ###
 _build_libpng() {
-local VERSION="1.6.21"
+local VERSION="1.6.39"
 local FOLDER="libpng-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sourceforge.net/projects/libpng/files/libpng16/${VERSION}/${FILE}"
@@ -403,10 +403,10 @@ popd
 
 ### LIBTIFF ###
 _build_libtiff() {
-local VERSION="4.0.6"
+local VERSION="4.0.10"
 local FOLDER="tiff-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
-local URL="ftp://ftp.remotesensing.org/pub/libtiff/${FILE}"
+local URL="https://download.osgeo.org/libtiff/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
@@ -420,7 +420,7 @@ popd
 
 ### FREETYPE ###
 _build_freetype() {
-local VERSION="2.6.2"
+local VERSION="2.13.0"
 local FOLDER="freetype-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sourceforge.net/projects/freetype/files/freetype2/${VERSION}/${FILE}"
@@ -438,10 +438,10 @@ popd
 
 ### CURL ###
 _build_curl() {
-local VERSION="7.46.0"
+local VERSION="7.88.1"
 local FOLDER="curl-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
-local URL="http://curl.haxx.se/download/${FILE}"
+local URL="https://curl.se/download/${FILE}"
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
@@ -475,7 +475,7 @@ popd
 
 ### GMP ###
 _build_gmp() {
-local VERSION="6.1.0"
+local VERSION="6.2.1"
 local FOLDER="gmp-${VERSION}"
 local FILE="${FOLDER}.tar.xz"
 local URL="ftp://ftp.gnu.org/gnu/gmp/${FILE}"
@@ -491,7 +491,7 @@ popd
 
 ### LIBXSLT ###
 _build_libxslt() {
-local VERSION="1.1.28"
+local VERSION="1.1.34"
 local FOLDER="libxslt-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="ftp://xmlsoft.org/libxslt/${FILE}"
@@ -510,7 +510,7 @@ popd
 
 ### BDB ###
 _build_bdb() {
-local VERSION="6.1.26"
+local VERSION="18.1.40"
 local FOLDER="db-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://download.oracle.com/berkeley-db/${FILE}"
@@ -527,7 +527,7 @@ popd
 
 ### MYSQL-CONNECTOR ###
 _build_mysqlc() {
-local VERSION="6.1.6"
+local VERSION="6.1.11"
 local FOLDER="mysql-connector-c-${VERSION}-src"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://cdn.mysql.com/Downloads/Connector-C/${FILE}"
@@ -601,7 +601,7 @@ popd
 ### PHP ###
 _build_php() {
 # sudo apt-get install php5-cli
-local VERSION="5.6.17"
+local VERSION="8.2.3"
 local FOLDER="php-${VERSION}"
 local FILE="${FOLDER}.tar.xz"
 local URL="http://ch1.php.net/get/${FILE}/from/this/mirror"
