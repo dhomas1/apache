@@ -2,7 +2,7 @@
 
 ### ZLIB ###
 _build_zlib() {
-local VERSION="1.2.13"
+local VERSION="1.3"
 local FOLDER="zlib-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://zlib.net/${FILE}"
@@ -28,7 +28,7 @@ pushd "target/${FOLDER}"
 sed -i -e "s/all: libbz2.a bzip2 bzip2recover test/all: libbz2.a bzip2 bzip2recover/" Makefile
 make -f Makefile-libbz2_so CC="${CC}" AR="${AR}" RANLIB="${RANLIB}" \
   CFLAGS="${CFLAGS} -fpic -fPIC -Wall -D_FILE_OFFSET_BITS=64"
-ln -s libbz2.so.1.0.6 libbz2.so
+ln -s libbz2.so.1.0.8 libbz2.so
 cp -avR *.h "${DEPS}/include/"
 cp -avR *.so* "${DEST}/lib/"
 popd
@@ -36,7 +36,7 @@ popd
 
 ### LIBLZMA ###
 _build_liblzma() {
-local VERSION="5.4.1"
+local VERSION="5.4.4"
 local FOLDER="xz-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://tukaani.org/xz/${FILE}"
@@ -53,7 +53,7 @@ popd
 
 ### OPENSSL ###
 _build_openssl() {
-local VERSION="1.1.1t"
+local VERSION="1.1.1w"
 local FOLDER="openssl-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://www.openssl.org/source/${FILE}"
@@ -81,7 +81,7 @@ popd
 
 ### SQLITE ###
 _build_sqlite() {
-local VERSION="3410000"
+local VERSION="3430100"
 local FOLDER="sqlite-autoconf-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sqlite.org/$(date +%Y)/${FILE}"
@@ -96,7 +96,7 @@ popd
 
 ### ICU ###
 _build_icu() {
-local VERSION="72-1"
+local VERSION="73-2"
 local FOLDER="icu"
 local FILE="icu4c-${VERSION/-/_}-src.tgz"
 local URL="https://github.com/unicode-org/icu/releases/download/release-${VERSION}/${FILE}"
@@ -143,7 +143,7 @@ popd
 
 ### LIBXML2 ###
 _build_libxml2() {
-local VERSION="2.9.14"
+local VERSION="2.11.5"
 local FOLDER="libxml2-${VERSION}"
 local FILE="${FOLDER}.tar.xz"
 local URL="https://download.gnome.org/sources/libxml2/${FILE}"
@@ -229,7 +229,7 @@ popd
 
 ### LUA ###
 _build_lua() {
-local VERSION="5.4.4"
+local VERSION="5.4.6"
 local FOLDER="lua-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://www.lua.org/ftp/${FILE}"
@@ -248,7 +248,7 @@ popd
 
 ### APR ###
 _build_apr() {
-local VERSION="1.7.2"
+local VERSION="1.7.4"
 local FOLDER="apr-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="https://dlcdn.apache.org/apr/${FILE}"
@@ -291,7 +291,7 @@ popd
 
 ### HTTPD ###
 _build_httpd() {
-local VERSION="2.4.55"
+local VERSION="2.4.57"
 local FOLDER="httpd-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="https://dlcdn.apache.org/httpd/${FILE}"
@@ -354,7 +354,8 @@ local VERSION="1.10.1"
 # $1: branch
 # $2: folder
 # $3: url
-local COMMIT="14432d6887d195730bee0d55c401a3ca12c9c986"
+#local COMMIT="14432d6887d195730bee0d55c401a3ca12c9c986"
+local COMMIT="523f7682087ed040ab87826054a5bd23007d76c1"
 local FOLDER="mod_evasive-${COMMIT}"
 local FILE="${COMMIT}.zip"
 local URL="https://github.com/shivaas/mod_evasive/archive/${FILE}"
@@ -385,7 +386,7 @@ popd
 
 ### LIBPNG ###
 _build_libpng() {
-local VERSION="1.6.39"
+local VERSION="1.6.40"
 local FOLDER="libpng-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sourceforge.net/projects/libpng/files/libpng16/${VERSION}/${FILE}"
@@ -401,7 +402,7 @@ popd
 
 ### LIBTIFF ###
 _build_libtiff() {
-local VERSION="4.0.10"
+local VERSION="4.6.0"
 local FOLDER="tiff-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="https://download.osgeo.org/libtiff/${FILE}"
@@ -418,7 +419,7 @@ popd
 
 ### FREETYPE ###
 _build_freetype() {
-local VERSION="2.13.0"
+local VERSION="2.13.2"
 local FOLDER="freetype-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="http://sourceforge.net/projects/freetype/files/freetype2/${VERSION}/${FILE}"
@@ -436,7 +437,7 @@ popd
 
 ### CURL ###
 _build_curl() {
-local VERSION="7.88.1"
+local VERSION="8.3.0"
 local FOLDER="curl-${VERSION}"
 local FILE="${FOLDER}.tar.gz"
 local URL="https://curl.se/download/${FILE}"
@@ -473,10 +474,11 @@ popd
 
 ### GMP ###
 _build_gmp() {
-local VERSION="6.2.1"
+local VERSION="6.3.0"
 local FOLDER="gmp-${VERSION}"
 local FILE="${FOLDER}.tar.xz"
-local URL="ftp://ftp.gnu.org/gnu/gmp/${FILE}"
+#local URL="ftp://ftp.gnu.org/gnu/gmp/${FILE}"
+local URL="https://gmplib.org/download/gmp/${FILE}"
 
 _download_xz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
@@ -599,7 +601,7 @@ popd
 ### PHP ###
 _build_php() {
 # sudo apt-get install php5-cli
-local VERSION="8.2.3"
+local VERSION="8.2.11"
 local FOLDER="php-${VERSION}"
 local FILE="${FOLDER}.tar.xz"
 local URL="http://ch1.php.net/get/${FILE}/from/this/mirror"
