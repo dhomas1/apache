@@ -112,14 +112,14 @@ if [ ! -d "${ICU_NATIVE}" ]; then
     "${ICU}/source/configure"
     make )
 fi
+export ac_cv_c_bigendian=no
 rm -fr "${ICU_HOST}"
 mkdir -p "${ICU_HOST}"
 pushd "${ICU_HOST}"
 "${ICU}/source/configure" --host="${HOST}" --prefix="${DEPS}" \
   --libdir="${DEST}/lib" --disable-static \
   --with-cross-build="${ICU_NATIVE}" \
-  --disable-extras --disable-samples --disable-tests \
-  --ac_cv_c_bigendian=no
+  --disable-extras --disable-samples --disable-tests
 # --enable-rpath
 make
 make install
