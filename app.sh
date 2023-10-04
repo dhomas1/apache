@@ -118,7 +118,8 @@ pushd "${ICU_HOST}"
 "${ICU}/source/configure" --host="${HOST}" --prefix="${DEPS}" \
   --libdir="${DEST}/lib" --disable-static \
   --with-cross-build="${ICU_NATIVE}" \
-  --disable-extras --disable-samples --disable-tests
+  --disable-extras --disable-samples --disable-tests \
+  --ac_cv_c_bigendian=no
 # --enable-rpath
 make
 make install
